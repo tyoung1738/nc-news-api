@@ -20,6 +20,7 @@ describe("GET requests", ()=>{
         .expect(200)
         .then(({body})=>{
             const {topics} = body
+            expect(topics.length === 0).toBe(false)
             topics.forEach((topic)=>{
                 expect(topic).toMatchObject({
                     slug: expect.any(String),
@@ -32,6 +33,9 @@ describe("GET requests", ()=>{
         return request(app)
             .get(`/api/notARoute`)
             .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Not found")
+            })
     })
 })
 
@@ -53,9 +57,8 @@ describe('GET /api/articles/:articleID', ()=>{
             .get('/api/articles/2')
             .expect(200)
             .then(({body})=>{
-                const {articles} = body
-                expect(articles.length===1).toBe(true)
-                const article = articles[0]
+                const {article} = body
+                
                 expect(article.article_id).toBe(2)
 
                 expect(article).toMatchObject({
@@ -84,6 +87,38 @@ describe('GET /api/articles/:articleID', ()=>{
             .then(({body})=>{
                 expect(body.msg).toBe('Bad request')
             })
+        })      
+    })
+
+    describe("GET /api/articles", ()=>{
+        test("should return array of all articles", ()=>{
+            return request(app)
+                .get('/api/articles')
+                .expect(200)
+                .then(({body})=>{
+                    const {articles} = body
+                    expect(articles.length === 13).toBe(true)
+                    articles.forEach((article)=>{
+                        expect(article).toMatchObject(
+                            {
+                                author: expect.any(String),
+                                title: expect.any(String),
+                                topic: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                article_img_url: expect.any(String)
+                            })
+                        expect(article).not.toHaveProperty('body')
+                    })
+                    expect(articles).toBeSortedBy('created_at', {descending: true})
+                })
         })
-            
+        test("should return err for no matching endpoint", ()=>{
+            return request(app)
+                .get('/api/articlez')
+                .expect(404)
+                .then(({body})=>{
+                    expect(body.msg).toBe("Not found")
+                })
+        })
     })
