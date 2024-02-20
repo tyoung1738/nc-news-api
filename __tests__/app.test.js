@@ -1,11 +1,9 @@
 const app = require(`../app/app`)
 const request = require('supertest')
-const express = require('express')
 const db = require('../db/connection')
 const seed = require('../db/seeds/seed')
 const data = require('../db/data/test-data/index')
-
-app.use(express.json())
+const apiEndpointsJSON = require('../endpoints.json')
 
 beforeEach(()=>{
     return seed(data)
@@ -16,12 +14,13 @@ afterAll(()=>{
 })
 
 describe("GET requests", ()=>{
-    test("GET /api/topics - should return an array of objects", ()=>{
+    test("GET /api/topics - should return an array of objects with properties 'slug' and 'description", ()=>{
         return request(app)
         .get('/api/topics')
         .expect(200)
         .then(({body})=>{
-            body.forEach((topic)=>{
+            const {topics} = body
+            topics.forEach((topic)=>{
                 expect(topic).toMatchObject({
                     slug: expect.any(String),
                     description: expect.any(String)
@@ -33,5 +32,17 @@ describe("GET requests", ()=>{
         return request(app)
             .get(`/api/notARoute`)
             .expect(404)
+    })
+})
+
+describe('GET /api', ()=>{
+    test('GET /api returns object of all available endpoints', ()=>{
+        return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body})=>{
+                const {endpoints} = body
+                expect(endpoints).toEqual(apiEndpointsJSON)
+            })
     })
 })
