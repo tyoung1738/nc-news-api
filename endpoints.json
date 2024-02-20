@@ -42,5 +42,21 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comments of provided article_id",
+    "queries": ["author", "topic", "sort_by", "order"],
+    "exampleResponse": {
+      "comments": [
+        {
+          "comment_id": 1,
+          "votes": 4,
+          "created_at": "2018-05-30T15:59:13.341Z",
+          "author": "weegembump",
+          "body": "This guy suuucks",
+          "article_id": 2
+        }
+      ]
+    }
   }
 }
