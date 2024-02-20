@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { getTopics, getAllEndpoints, getArticleByID } = require('./controllers/index')
+const { getTopics, getAllEndpoints, getArticleByID, getArticles } = require('./controllers/index')
 
 app.use(express.json())
 
@@ -8,9 +8,16 @@ app.get('/api/topics', getTopics)
 
 app.get('/api', getAllEndpoints)
 
+app.get('/api/articles', getArticles)
+
 app.get('/api/articles/:article_id', getArticleByID)
 
-// app.all()
+app.all('/*', (req, res, next)=>{
+    const err = new Error("Not found")
+    err.statusCode = 404
+    res.status(404).send({msg: "Not found"})
+    next(err)
+})
 
 //ERROR HANDLING
 
