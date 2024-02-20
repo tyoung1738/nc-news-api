@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { getTopics, getAllEndpoints, getArticleByID, getArticles } = require('./controllers/index')
+const { getTopics, getAllEndpoints, getArticleByID, getArticles, getCommentsByArticleID } = require('./controllers/index')
 
 app.use(express.json())
 
@@ -11,6 +11,8 @@ app.get('/api', getAllEndpoints)
 app.get('/api/articles', getArticles)
 
 app.get('/api/articles/:article_id', getArticleByID)
+
+app.get('/api/articles/:article_id/comments', getCommentsByArticleID)
 
 app.all('/*', (req, res, next)=>{
     const err = new Error("Not found")

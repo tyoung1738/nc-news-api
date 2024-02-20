@@ -13,6 +13,25 @@ afterAll(()=>{
     db.end()
 })
 
+describe("GET requests - invalid routes", ()=>{
+    test("should return err for no matching endpoint", ()=>{
+        return request(app)
+            .get('/api/articlez')
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Not found")
+            })
+    })
+    test("should return 404 not found for invalid endpoint", ()=>{
+        return request(app)
+            .get(`/nowhere`)
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Not found")
+            })
+    })
+})
+
 describe("GET requests", ()=>{
     test("GET /api/topics - should return an array of objects with properties 'slug' and 'description", ()=>{
         return request(app)
@@ -28,14 +47,6 @@ describe("GET requests", ()=>{
                 })
             })
         })
-    })
-    test("GET /api/notARoute - should return 404 not found for invalid endpoint", ()=>{
-        return request(app)
-            .get(`/api/notARoute`)
-            .expect(404)
-            .then(({body})=>{
-                expect(body.msg).toBe("Not found")
-            })
     })
 })
 
@@ -113,12 +124,46 @@ describe('GET /api/articles/:articleID', ()=>{
                     expect(articles).toBeSortedBy('created_at', {descending: true})
                 })
         })
-        test("should return err for no matching endpoint", ()=>{
+    })
+
+    describe("GET /api/articles/:article_id/comments", ()=>{
+        test("should return array of comments for given article_id", ()=>{
             return request(app)
-                .get('/api/articlez')
-                .expect(404)
-                .then(({body})=>{
-                    expect(body.msg).toBe("Not found")
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(({body})=>{
+                const {comments} = body
+                expect(comments.length > 0).toBe(true)
+                //check contents for desired properties
+                comments.forEach((comment)=>{
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: expect.any(Number),
+                        created_at: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        article_id: expect.any(Number)
+                    })
                 })
+                //check contents for desired order
+                expect(comments).toBeSortedBy('created_at', {descending: true})
+            })
         })
+        test("should return error for valid but non-existent article id", ()=>{
+            return request(app)
+            .get('/api/articles/1000/comments')
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Not found")
+            })
+        })
+        test("should return error for invalid article id", ()=>{
+            return request(app)
+            .get('/api/articles/notanid')
+            .expect(400)
+            .then(({body})=>{
+                expect(body.msg).toBe('Bad request')
+            })
+        })   
+        
     })
