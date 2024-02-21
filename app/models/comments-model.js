@@ -18,5 +18,5 @@ exports.addComment = (comment, articleID)=>{
 
     const queryStr = `INSERT INTO comments (body, author, article_id) VALUES ($1, $2, $3) RETURNING *;`
     const query = db.query(queryStr, inputs)
-    return Promise.all([checkExists, query])
+    return Promise.all([checkExists('articles', 'article_id', articleID), query])
 }

@@ -18,3 +18,13 @@ exports.selectAllArticles = ()=>{
     return db.query(queryStr)
 }
 
+exports.updateArticle = (articleID, voteIncrement)=>{
+    const queryStr = `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`
+    const query = db.query(queryStr, [voteIncrement, articleID])
+    return Promise.all([checkExists('articles', 'article_id', articleID),query]) 
+    .then(([checkExists, queryResult])=>{
+        const [updatedArticle] = queryResult.rows
+        return updatedArticle
+    })
+}
+
