@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { getTopics, getAllEndpoints, getArticleByID, getArticles, getCommentsByArticleID } = require('./controllers/index')
+const { getTopics, getAllEndpoints, getArticleByID, getArticles, getCommentsByArticleID, postComment } = require('./controllers/index')
 
 app.use(express.json())
 
@@ -14,6 +14,9 @@ app.get('/api/articles/:article_id', getArticleByID)
 
 app.get('/api/articles/:article_id/comments', getCommentsByArticleID)
 
+app.post('/api/articles/:article_id/comments', postComment)
+
+//ERROR HANDLING
 app.all('/*', (req, res, next)=>{
     const err = new Error("Not found")
     err.statusCode = 404
@@ -21,12 +24,13 @@ app.all('/*', (req, res, next)=>{
     next(err)
 })
 
-//ERROR HANDLING
-
 app.use((err, req, res, next) =>{
     //psql errors
     if(err.code === '22P02'){
         res.status(400).send({msg: "Bad request"})
+    }
+    if(err.code === '23503'){
+        res.status(404).send({msg: "Not found"})
     }
 
     next(err)
@@ -37,7 +41,6 @@ app.use((err, req, res, next)=>{
     if(err.status && err.msg){
         res.status(err.status).send({msg: err.msg})
     }
-
     //catch all
     res.status(500).send({msg: "Internal server error"})
 

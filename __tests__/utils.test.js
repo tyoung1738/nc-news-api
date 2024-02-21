@@ -1,8 +1,10 @@
 const {
   convertTimestampToDate,
   createRef,
-  formatComments,
+  formatComments
 } = require("../db/seeds/utils");
+
+const {checkExists} = require('../app/models/utils/utils')
 
 describe("convertTimestampToDate", () => {
   test("returns a new object", () => {
@@ -102,3 +104,12 @@ describe("formatComments", () => {
     expect(formattedComments[0].created_at).toEqual(new Date(timestamp));
   });
 });
+
+describe("checkExists", ()=>{
+  test("should reject with error if query has no output", ()=>{
+    checkExists('articles', 'article_id', 1000)
+    .catch((err)=>{
+      expect(err).toEqual({status: 404, msg: "Resource not found"})
+    })
+  })
+})

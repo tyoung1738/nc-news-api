@@ -1,18 +1,13 @@
 const db = require('../../db/connection')
+const {checkExists} = require('../models/utils/utils')
 
 exports.selectArticleByID = (articleID)=>{
     const queryStr = `SELECT * FROM articles WHERE article_id = $1`
-    return db.query(queryStr, [articleID])
-    .then(({rows})=>{
-        if(rows.length === 0){
-            return Promise.reject({
-                status: 404,
-                msg: "Not found"
-            })
-        } else{
-            const [articleObj] = rows
-            return articleObj
-        }
+    const query = db.query(queryStr, [articleID])
+    return Promise.all([query, checkExists('articles', 'article_id', articleID)])
+    .then(([queryResult])=>{
+        const [articleObj] = queryResult.rows
+        return articleObj
     })
 }
 
