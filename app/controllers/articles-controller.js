@@ -23,7 +23,10 @@ exports.getArticles = (req, res, next)=>{
 
 exports.patchArticle = (req, res, next)=>{
     const articleID = req.params.article_id
-    const voteIncrement = req.body.inc_votes
+
+    let voteIncrement = req.body.inc_votes || 0
+    //default to 0 if not provided 
+    
     updateArticle(articleID, voteIncrement).then((article)=>{
         res.status(200).send({article})
     })

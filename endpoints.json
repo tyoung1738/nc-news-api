@@ -62,6 +62,10 @@
   "POST /api/articles/:article_id/comments": {
     "description": "posts comment to article of provided article_id",
     "queries": [],
+    "exampleRequestBody": {
+      "username": "rogersop",
+      "body": "Ha-ha"
+      },
     "exampleResponse": {
       "comment": [
         {
@@ -74,5 +78,30 @@
         }
       ]
     }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "updates article vote count by provided increment",
+    "queries": [],
+    "exampleRequestBody": {
+      "increment_count": 100
+      },
+    "exampleResponse": {
+      "article": 
+        { "article_id" : 2,
+          "title": "Seafood substitutions are increasing",
+          "topic": "cooking",
+          "author": "weegembump",
+          "body": "Text from the article..",
+          "created_at": "2018-05-30T15:59:13.341Z",
+          "votes": 101,
+          "comment_count": 6
+        }
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes comment of provided comment_id",
+    "queries": [],
+    "exampleResponse": {}
   }
+  
 }

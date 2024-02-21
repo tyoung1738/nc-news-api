@@ -179,22 +179,22 @@ describe("GET /api/articles/:article_id/comments", ()=>{
 
 describe('POST /api/articles/:article_id/comments', ()=>{
     test('201 - should return added comment', ()=>{
-        const input = {username: "rogersop", body: "Ha-ha"}
-        return request(app)
-            .post('/api/articles/2/comments')
-            .send(input)
-            .expect(201)
-            .then(({body})=>{
-                const {comment} = body
-                expect(comment).toMatchObject({
-                    comment_id: expect.any(Number),
-                    body: expect.any(String),
-                    author: expect.any(String),
-                    created_at: expect.any(String)
-                    })
-                expect(comment.article_id).toBe(2)
-                expect(comment.votes).toBe(0)
+    const input = {username: "rogersop", body: "Ha-ha"}
+    return request(app)
+        .post('/api/articles/2/comments')
+        .send(input)
+        .expect(201)
+        .then(({body})=>{
+            const {comment} = body
+            expect(comment).toMatchObject({
+                comment_id: expect.any(Number),
+                body: expect.any(String),
+                author: expect.any(String),
+                created_at: expect.any(String)
                 })
+            expect(comment.article_id).toBe(2)
+            expect(comment.votes).toBe(0)
+            })
         })
     test('201 - should ignore unnecessary properties', ()=>{
         const input = {username: "rogersop", body: "I'm expecting 201", rogueProperty: "IM ROGUE"}
@@ -326,6 +326,27 @@ describe('PATCH /api/articles/:article_id', ()=>{
             expect(article).not.toHaveProperty("rogueProperty")
         })
     })
+    test('200 - should return original article unchanged for missing inc_votes property', ()=>{
+        const input = {}
+        return request(app)
+        .patch('/api/articles/1')
+        .send(input)
+        .expect(200)
+        .then(({body})=>{
+            const {article} = body
+            expect(article.votes).toBe(100)
+            expect(article.article_id).toBe(1)
+            expect(article).toMatchObject(
+            {
+                author: expect.any(String),
+                title: expect.any(String),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String)
+            })
+        })
+    })
     test('400 - should return err for invalid article_id', ()=>{
         const input = {inc_votes: 109}
         return request(app)
@@ -346,16 +367,6 @@ describe('PATCH /api/articles/:article_id', ()=>{
             expect(body.msg).toBe('Bad request')
         })
     })
-    test('400 - should return err for missing essential field', ()=>{
-        const input = {}
-        return request(app)
-        .patch('/api/articles/2')
-        .send(input)
-        .expect(400)
-        .then(({body})=>{
-            expect(body.msg).toBe('Bad request')
-        })
-    })
     test('404 - should return err for valid but non-existent article_id', ()=>{
         const input = {inc_votes: 109}
         return request(app)
@@ -364,6 +375,33 @@ describe('PATCH /api/articles/:article_id', ()=>{
         .expect(404)
         .then(({body})=>{
             expect(body.msg).toBe('Resource not found')
+        })
+    })
+})
+
+describe('DELETE /api/comments/:comment_id', ()=>{
+    test('204 - should return no content', ()=>{
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+        .then(({body})=>{
+            expect(body).toEqual({})
+        })
+    })
+    test('400 - should return err for invalid comment_id', ()=>{
+        return request(app)
+        .delete('/api/comments/notanid')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad request")
+        })
+    })
+    test('404 - should return err for non-existent but valid comment_id', ()=>{
+        return request(app)
+        .delete('/api/comments/1000')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Resource not found")
         })
     })
 })
