@@ -20,3 +20,13 @@ exports.addComment = (comment, articleID)=>{
     const query = db.query(queryStr, inputs)
     return Promise.all([checkExists('articles', 'article_id', articleID), query])
 }
+
+exports.removeComment = (commentID)=>{
+    const queryStr = `DELETE FROM comments WHERE comment_id = $1 RETURNING *`
+    const query = db.query(queryStr, [commentID])
+    return Promise.all([checkExists('comments', 'comment_id', commentID), query])
+    .then(([checkExists, queryResult])=>{
+        const deletedRows = queryResult.rows
+        return deletedRows
+    })
+}

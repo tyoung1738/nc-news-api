@@ -1,5 +1,5 @@
 const { query } = require('../../db/connection')
-const {selectCommentsByArticleID, addComment} = require('../models/comments-model')
+const {selectCommentsByArticleID, addComment, removeComment} = require('../models/comments-model')
 
 exports.getCommentsByArticleID = (req, res, next)=>{
     const articleID = req.params.article_id
@@ -21,6 +21,17 @@ exports.postComment = (req, res, next)=>{
     .then(([checkExists, queryResult])=>{
         [commentOutput] = queryResult.rows
         res.status(201).send({comment: commentOutput})
+    })
+    .catch((err)=>{
+        next(err)
+    })
+}
+
+exports.deleteComment = (req, res, next)=>{
+    const commentID = req.params.comment_id    
+    removeComment(commentID)
+    .then(()=>{
+        res.status(204).send()
     })
     .catch((err)=>{
         next(err)
