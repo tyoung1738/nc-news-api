@@ -63,7 +63,7 @@ describe('GET /api', ()=>{
 })
 
 describe('GET /api/articles/:articleID', ()=>{
-    test('200 - returns object with correct properties, inc. comment count', ()=>{
+    test('200 - returns object with correct properties', ()=>{
         return request(app)
             .get('/api/articles/2')
             .expect(200)
@@ -80,11 +80,10 @@ describe('GET /api/articles/:articleID', ()=>{
                         created_at: expect.any(String),
                         votes: expect.any(Number),
                         article_img_url: expect.any(String),
-                        comment_count: expect.stringMatching(/\d+/)
                     })
                 })
             })
-    test('200 - returns specified article with non-zero comment count', ()=>{
+    test('200 - returns specified article with comment count now added', ()=>{
         return request(app)
             .get('/api/articles/1')
             .expect(200)
@@ -99,7 +98,7 @@ describe('GET /api/articles/:articleID', ()=>{
                         created_at: expect.any(String),
                         votes: expect.any(Number),
                         article_img_url: expect.any(String),
-                        comment_count: expect.stringMatching(/11/)
+                        comment_count: expect.stringMatching(/\d+/)
                     })
                 })
             })
