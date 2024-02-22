@@ -63,7 +63,7 @@ describe('GET /api', ()=>{
 })
 
 describe('GET /api/articles/:articleID', ()=>{
-    test('200 - returns object with correct properties', ()=>{
+    test('200 - returns object with correct properties, inc. comment count', ()=>{
         return request(app)
             .get('/api/articles/2')
             .expect(200)
@@ -80,7 +80,26 @@ describe('GET /api/articles/:articleID', ()=>{
                         created_at: expect.any(String),
                         votes: expect.any(Number),
                         article_img_url: expect.any(String),
-                        //comment_count: expect.any(Number)
+                        comment_count: expect.stringMatching(/\d+/)
+                    })
+                })
+            })
+    test('200 - returns specified article with non-zero comment count', ()=>{
+        return request(app)
+            .get('/api/articles/1')
+            .expect(200)
+            .then(({body})=>{
+                const {article} = body
+                expect(article.article_id).toBe(1)
+                expect(article).toMatchObject({
+                        author: expect.any(String),
+                        title: expect.any(String),
+                        body: expect.any(String),
+                        topic: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.stringMatching(/11/)
                     })
                 })
             })
@@ -118,7 +137,8 @@ describe("GET /api/articles", ()=>{
                             topic: expect.any(String),
                             created_at: expect.any(String),
                             votes: expect.any(Number),
-                            article_img_url: expect.any(String)
+                            article_img_url: expect.any(String),
+                            comment_count: expect.stringMatching(/\d+/)
                         })
                     expect(article).not.toHaveProperty('body')
                 })
