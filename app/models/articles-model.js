@@ -11,11 +11,36 @@ exports.selectArticleByID = (articleID)=>{
     })
 }
 
-exports.selectAllArticles = ()=>{
-    const queryStr = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles 
-    LEFT JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id ORDER BY articles.created_at DESC;`
-    return db.query(queryStr)
+exports.selectAllArticles = (query)=>{
+    const [columnName] = Object.keys(query)
+    const [filterValue] = Object.values(query)
+    const queryArr = []
+
+    let queryStr = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles 
+    LEFT JOIN comments ON articles.article_id = comments.article_id`
+
+    if(columnName){
+        //has query
+        //check it is a valid query
+        const validColumns = ['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count']
+
+        if(!validColumns.find((col)=>col === columnName)){
+            return Promise.reject({status: 400, msg: "Bad request"})
+        }
+        //check it is a valid filter value
+        return checkExists('articles', columnName, filterValue)
+        .then(()=>{
+            //if so execute full query
+            queryStr += ` WHERE articles.topic = $1`
+            queryArr.push(filterValue)
+
+            queryStr += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC;`
+            return db.query(queryStr, queryArr)
+        })
+    }
+
+    queryStr += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC;`
+    return db.query(queryStr, queryArr)
 }
 
 exports.updateArticle = (articleID, voteIncrement)=>{
