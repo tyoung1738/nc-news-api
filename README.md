@@ -1,12 +1,34 @@
 # Northcoders News API
 
-In order to run the protocol locally, we must set up our test and development databases.
+## Summary ##
+This repo enables the hosting of a live backend API. It provides the data and seed files to establish test/development/production databases, and provides an express app with error handling, models and controllers to enable querying of the database. It also provides a full test suite. The test database is queried locally via Jest and the production database can be queried via **[this link](https://ty-news-api.onrender.com/api/)**.  
 
-1. Create 2 files: 
-    a) .env.test
-    b) .env.development
-2. In each file, define the database to be used for each environment:
-    a) PGDATABASE=nc_news
-    b) PGDATABASE=nc_news_test
+## Instructions ##
+
+1. In order to establish the API, first clone this repo into a suitable file. To do this via terminal use `git clone <link_to_this_repo>`
+
+2. Install the required dependencies `npm install --dev` will install those with devDependencies also
+
+3. In order to run the protocol locally, we must set up our test and development databases.
     
-We have configured our connection.js file such that this will connect to our test DB for npm run test, otherwise it will connect to our development database. 
+    Create 2 files:  
+        a) `.env.test`  
+        b) `.env.development`  
+    
+    In each file, define the database to be used for each environment:  
+        a) `PGDATABASE=nc_news`  
+        b) `PGDATABASE=nc_news_test`  
+
+We have configured our `connection.js` file to connect to our test database when running tests and connect to our development database otherwise. 
+
+4. Setup and seed a database locally with the command `npm run setup-dbs` then `npm run seed`
+
+5. Run tests using the Jest test suite installed `npm t`
+
+### Dependencies ###
+Minimum versions required to run protocol:
+
+`Node.js v21.4.0`
+
+`Postgres 14.10` (for Ubuntu)
+
