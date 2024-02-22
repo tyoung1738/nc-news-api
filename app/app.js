@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { getTopics, getAllEndpoints, getArticleByID, getArticles, getCommentsByArticleID, postComment, patchArticle, deleteComment } = require('./controllers/index')
+const { getTopics, getAllEndpoints, getArticleByID, getArticles, getCommentsByArticleID, postComment, patchArticle, deleteComment, getUsers } = require('./controllers/index')
 
 app.use(express.json())
 
@@ -19,6 +19,8 @@ app.post('/api/articles/:article_id/comments', postComment)
 app.patch('/api/articles/:article_id', patchArticle)
 
 app.delete('/api/comments/:comment_id', deleteComment)
+
+app.get('/api/users', getUsers)
 
 //ERROR HANDLING
 app.all('/*', (req, res, next)=>{
