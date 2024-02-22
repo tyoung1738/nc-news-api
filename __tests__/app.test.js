@@ -63,7 +63,7 @@ describe('GET /api', ()=>{
 })
 
 describe('GET /api/articles/:articleID', ()=>{
-    test('returns object with correct properties', ()=>{
+    test('200 - returns object with correct properties', ()=>{
         return request(app)
             .get('/api/articles/2')
             .expect(200)
@@ -79,11 +79,12 @@ describe('GET /api/articles/:articleID', ()=>{
                         topic: expect.any(String),
                         created_at: expect.any(String),
                         votes: expect.any(Number),
-                        article_img_url: expect.any(String)
+                        article_img_url: expect.any(String),
+                        //comment_count: expect.any(Number)
                     })
                 })
             })
-    test("should return error for valid but non-existent article id", ()=>{
+    test("404 - should return error for valid but non-existent article id", ()=>{
         return request(app)
         .get('/api/articles/1000')
         .expect(404)
@@ -91,7 +92,7 @@ describe('GET /api/articles/:articleID', ()=>{
             expect(body.msg).toBe("Resource not found")
         })
     })
-    test("should return error for invalid article id", ()=>{
+    test("400 - should return error for invalid article id", ()=>{
         return request(app)
         .get('/api/articles/notanid')
         .expect(400)
@@ -147,12 +148,21 @@ describe("GET /api/articles", ()=>{
                 
             })
     })
-    test('400 - should return err for invalid query', ()=>{
+    test('200 - should provide empty array for valid topic query with no results', ()=>{
+        return request(app)
+            .get('/api/articles?topic=paper')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles.length).toBe(0)   
+            })
+    })
+    test('404 - should return err for invalid query', ()=>{
         return request(app)
             .get('/api/articles?bananas=yellow')
-            .expect(400)
+            .expect(404)
             .then(({body})=>{
-                expect(body.msg).toBe("Bad request")
+                expect(body.msg).toBe("Resource not found")
             })
     })
     test('404 - should return err for valid query of invalid value', ()=>{

@@ -2,7 +2,7 @@ const db = require('../../db/connection')
 const {checkExists} = require('../models/utils/utils')
 
 exports.selectArticleByID = (articleID)=>{
-    const queryStr = `SELECT * FROM articles WHERE article_id = $1`
+    const queryStr = `SELECT * FROM articles WHERE article_id = $1;`
     const query = db.query(queryStr, [articleID])
     return Promise.all([query, checkExists('articles', 'article_id', articleID)])
     .then(([queryResult])=>{
@@ -25,10 +25,10 @@ exports.selectAllArticles = (query)=>{
         const validColumns = ['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count']
 
         if(!validColumns.find((col)=>col === columnName)){
-            return Promise.reject({status: 400, msg: "Bad request"})
+            return Promise.reject({status: 404, msg: "Resource not found"})
         }
-        //check it is a valid filter value
-        return checkExists('articles', columnName, filterValue)
+        //check it is a valid filter value in topics data 
+        return checkExists('topics', 'slug', filterValue)
         .then(()=>{
             //if so execute full query
             queryStr += ` WHERE articles.topic = $1`
