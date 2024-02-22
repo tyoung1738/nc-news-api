@@ -102,7 +102,7 @@ describe('GET /api/articles/:articleID', ()=>{
     })
 
 describe("GET /api/articles", ()=>{
-    test("should return array of all articles", ()=>{
+    test("200 - should return array of all articles if no query", ()=>{
         return request(app)
             .get('/api/articles')
             .expect(200)
@@ -122,6 +122,45 @@ describe("GET /api/articles", ()=>{
                     expect(article).not.toHaveProperty('body')
                 })
                 expect(articles).toBeSortedBy('created_at', {descending: true})
+            })
+    })
+    test('200 - should provide array of articles filtered by topic query', ()=>{
+        return request(app)
+            .get('/api/articles?topic=cats')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles.length).not.toBe(0)
+                articles.forEach(article =>{
+                    expect(article.topic).toBe('cats')
+
+                    expect(article).toMatchObject(
+                        {
+                            author: expect.any(String),
+                            title: expect.any(String),
+                            topic: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            article_img_url: expect.any(String)
+                        })
+                    })
+                
+            })
+    })
+    test('400 - should return err for invalid query', ()=>{
+        return request(app)
+            .get('/api/articles?bananas=yellow')
+            .expect(400)
+            .then(({body})=>{
+                expect(body.msg).toBe("Bad request")
+            })
+    })
+    test('404 - should return err for valid query of invalid value', ()=>{
+        return request(app)
+            .get('/api/articles?topic=bananas')
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Resource not found")
             })
     })
 })
@@ -413,7 +452,7 @@ describe('GET /api/users', ()=>{
         .expect(200)
         .then(({body})=>{
             const {users} = body
-            expect(users.length).not.toBe(0)
+            expect(users.length).toBe(4)
             users.forEach((user)=>{
                 expect(user).toMatchObject({
                     username: expect.any(String),
@@ -424,3 +463,4 @@ describe('GET /api/users', ()=>{
         })
     })
 })
+
