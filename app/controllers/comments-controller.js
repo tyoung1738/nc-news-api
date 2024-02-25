@@ -1,4 +1,3 @@
-const { query } = require('../../db/connection')
 const {selectCommentsByArticleID, addComment, removeComment} = require('../models/comments-model')
 
 exports.getCommentsByArticleID = (req, res, next)=>{
