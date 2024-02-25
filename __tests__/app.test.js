@@ -511,6 +511,112 @@ describe('DELETE /api/comments/:comment_id', ()=>{
     })
 })
 
+describe('PATCH /api/comments/:comment_id', ()=>{
+    test('200 - responds with comment with updated vote ocunt - positive increment', ()=>{
+        const input = {inc_votes: 3}
+        return request(app)
+            .patch('/api/comments/1')
+            .send(input)
+            .expect(200)
+            .then(({body})=>{
+                const {comment} = body
+                expect(comment.comment_id).toBe(1)
+                expect(comment.votes).toBe(19)
+                expect(comment).toMatchObject({
+                    body: expect.any(String),
+                    article_id: expect.any(Number),
+                    author: expect.any(String),
+                    created_at: expect.any(String)
+                })    
+            })
+    })
+    test('200 - should return comment with updated vote count - negative increment', ()=>{
+        const input = {inc_votes: -15}
+        return request(app)
+        .patch('/api/comments/1')
+        .send(input)
+        .expect(200)
+        .then(({body})=>{
+            const {comment} = body
+            expect(comment.comment_id).toBe(1)
+            expect(comment.votes).toBe(1)
+            expect(comment).toMatchObject({
+                body: expect.any(String),
+                article_id: expect.any(Number),
+                author: expect.any(String),
+                created_at: expect.any(String)
+            }) 
+        })
+    })
+    test('200 - should ignore additional properties on request and return updated comment', ()=>{
+        const input = {inc_votes: 12, rogueProperty: "IM ROGUE"}
+        return request(app)
+        .patch('/api/comments/1')
+        .send(input)
+        .expect(200)
+        .then(({body})=>{
+            const {comment} = body
+            expect(comment.comment_id).toBe(1)
+            expect(comment.votes).toBe(28)
+            expect(comment).toMatchObject({
+                body: expect.any(String),
+                article_id: expect.any(Number),
+                author: expect.any(String),
+                created_at: expect.any(String)
+            }) 
+            expect(comment).not.toHaveProperty("rogueProperty")
+        })
+    })
+    test('200 - should return original comment unchanged for missing inc_votes property', ()=>{
+        const input = {}
+        return request(app)
+        .patch('/api/comments/1')
+        .send(input)
+        .expect(200)
+        .then(({body})=>{
+            const {comment} = body
+            expect(comment.comment_id).toBe(1)
+            expect(comment.votes).toBe(16)
+            expect(comment).toMatchObject({
+                body: expect.any(String),
+                article_id: expect.any(Number),
+                author: expect.any(String),
+                created_at: expect.any(String)
+            }) 
+        })
+    })
+    test('400 - should return err for invalid comment_id', ()=>{
+        const input = {inc_votes: 109}
+        return request(app)
+        .patch('/api/comments/notanid')
+        .send(input)
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe('Bad request')
+        })
+    })
+    test('400 - should return err for invalid increment', ()=>{
+        const input = {inc_votes: 'more'}
+        return request(app)
+        .patch('/api/comments/2')
+        .send(input)
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe('Bad request')
+        })
+    })
+    test('404 - should return err for valid but non-existent comment_id', ()=>{
+        const input = {inc_votes: 109}
+        return request(app)
+        .patch('/api/comments/1000')
+        .send(input)
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe('Resource not found')
+        })
+    })
+})
+
 describe('GET /api/users', ()=>{
     test('200 - should respond with array of user objects', ()=>{
         return request(app)
@@ -529,4 +635,30 @@ describe('GET /api/users', ()=>{
         })
     })
 })
+
+describe('GET /api/users/:username', ()=>{
+    test('200 - responds with user object of username given', ()=>{
+        return request(app)
+            .get('/api/users/rogersop')
+            .expect(200)
+            .then(({body})=>{
+                const {user} = body
+                expect(user.username).toBe('rogersop')
+                expect(user).toMatchObject({
+                    avatar_url: expect.any(String),
+                    name: expect.any(String)
+                })
+            })
+    })
+    test('404 - returns err for non-existent username (no 400 assuming alpha-numeric usernames', ()=>{
+        return request(app)
+            .get('/api/users/asdf')
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe('Resource not found')
+            })
+    })
+})
+
+
 
