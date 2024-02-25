@@ -30,3 +30,14 @@ exports.removeComment = (commentID)=>{
         return deletedRows
     })
 }
+
+exports.updateComment = (voteIncrement, commentID)=>{
+    const queryStr = `UPDATE comments SET votes = votes + $1
+    WHERE comment_id = $2 RETURNING *`
+    const query = db.query(queryStr, [voteIncrement, commentID])
+    return Promise.all([checkExists('comments', 'comment_id', commentID), query])
+    .then(([checkExists, queryResult])=>{
+        const [comment] = queryResult.rows
+        return comment 
+    })
+}

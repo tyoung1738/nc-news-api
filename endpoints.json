@@ -103,6 +103,23 @@
     "queries": [],
     "exampleResponse": {}
   },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates comment vote count for given comment_id",
+    "queries": [],
+    "exampleRequestBody": {
+      "increment_count": 100
+      },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 1,
+        "votes": 100,
+        "created_at": "2018-05-30T15:59:13.341Z",
+        "author": "weegembump",
+        "body": "Ha-ha nice try",
+        "article_id": 2
+      }
+    }   
+  },
   "GET /api/users": {
     "description": "fetches array of all users",
     "queries": [],
@@ -114,6 +131,18 @@
         "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
       }
       ]}
+  },
+  "GET /api/users/:username": {
+    "description": "serves an object of user of given username",
+    "queries": [],
+    "exampleResponse": {
+      "user": [
+        { "username" : "buttercup64",
+          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+          "name": "bill"
+        }
+      ]
     }
+  }
   
 }
