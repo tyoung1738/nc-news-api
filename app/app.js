@@ -1,26 +1,12 @@
 const express = require('express')
 const app = express()
 const { getTopics, getAllEndpoints, getArticleByID, getArticles, getCommentsByArticleID, postComment, patchArticle, deleteComment, getUsers } = require('./controllers/index')
+const apiRouter = require('./routes/api-router.js')
 
 app.use(express.json())
-
-app.get('/api/topics', getTopics)
+app.use('/api', apiRouter)
 
 app.get('/api', getAllEndpoints)
-
-app.get('/api/articles', getArticles)
-
-app.get('/api/articles/:article_id', getArticleByID)
-
-app.get('/api/articles/:article_id/comments', getCommentsByArticleID)
-
-app.post('/api/articles/:article_id/comments', postComment)
-
-app.patch('/api/articles/:article_id', patchArticle)
-
-app.delete('/api/comments/:comment_id', deleteComment)
-
-app.get('/api/users', getUsers)
 
 //ERROR HANDLING
 app.all('/*', (req, res, next)=>{

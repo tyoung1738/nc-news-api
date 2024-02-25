@@ -62,7 +62,7 @@ describe('GET /api', ()=>{
     })
 })
 
-describe('GET /api/articles/:articleID', ()=>{
+describe('GET /api/articles/:article_id', ()=>{
     test('200 - returns object with correct properties', ()=>{
         return request(app)
             .get('/api/articles/2')
@@ -121,7 +121,7 @@ describe('GET /api/articles/:articleID', ()=>{
     })
 
 describe("GET /api/articles", ()=>{
-    test("200 - should return array of all articles if no query", ()=>{
+    test("200 - should return array of all articles if no query, sorted by created_at", ()=>{
         return request(app)
             .get('/api/articles')
             .expect(200)
@@ -176,6 +176,43 @@ describe("GET /api/articles", ()=>{
                 expect(articles.length).toBe(0)   
             })
     })
+    test('200 - should allow sort_by query', ()=>{
+        return request(app)
+            .get('/api/articles?sort_by=author')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles).toBeSortedBy('author', {descending: true})
+            })
+    })
+    test('200 - should allow order by query', ()=>{
+        return request(app)
+            .get('/api/articles?order=asc')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles).toBeSortedBy('created_at', {descending: false})
+            })
+    })
+    test('200 - should allow chaining of queries', ()=>{
+        return request(app)
+            .get('/api/articles?sort_by=author&topic=cats&order=asc')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles).toBeSortedBy('author', {descending: false})
+                articles.forEach((article)=>expect(article.topic).toBe('cats'))
+            })
+    })
+    test('200 - should default to desc for invalid ORDER BY value', ()=>{
+        return request(app)
+            .get('/api/articles?order=bananas')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles).toBeSortedBy('created_at', {descending: true})
+            })
+    })
     test('404 - should return err for invalid query', ()=>{
         return request(app)
             .get('/api/articles?bananas=yellow')
@@ -184,7 +221,7 @@ describe("GET /api/articles", ()=>{
                 expect(body.msg).toBe("Resource not found")
             })
     })
-    test('404 - should return err for valid query of invalid value', ()=>{
+    test('404 - should return err for valid query of invalid value - WHERE clause', ()=>{
         return request(app)
             .get('/api/articles?topic=bananas')
             .expect(404)
