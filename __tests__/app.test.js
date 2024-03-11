@@ -121,13 +121,13 @@ describe('GET /api/articles/:article_id', ()=>{
     })
 
 describe("GET /api/articles", ()=>{
-    test("200 - should return array of all articles if no query, sorted by created_at", ()=>{
+    test("200 - should return array of 10 articles if no query, sorted by created_at", ()=>{
         return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body})=>{
                 const {articles} = body
-                expect(articles.length === 13).toBe(true)
+                expect(articles.length === 10).toBe(true)
                 articles.forEach((article)=>{
                     expect(article).toMatchObject(
                         {
@@ -204,6 +204,16 @@ describe("GET /api/articles", ()=>{
                 articles.forEach((article)=>expect(article.topic).toBe('cats'))
             })
     })
+    test('200 - should allow limit query', ()=>{
+        return request(app)
+            .get('/api/articles?limit=12')
+            .expect(200)
+            .then(({body})=>{
+                const {articles} = body
+                expect(articles.length).toBe(12)
+            })
+    })
+    test.todo('200 - should allow page (p) query to paginate results')
     test('200 - should default to desc for invalid ORDER BY value', ()=>{
         return request(app)
             .get('/api/articles?order=bananas')
@@ -230,6 +240,127 @@ describe("GET /api/articles", ()=>{
             })
     })
 })
+
+describe("POST /api/articles", ()=>{
+    test("201 - post article to articles for existing author", ()=>{
+        const input = {
+            author: "butter_bridge",
+            title: "Gentleman's Code",
+            body: "XYZ",
+            topic: "cats",
+            article_img_url: "http://"
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(input)
+            .expect(201)
+            .then(({body})=>{
+                const {article} = body
+                expect(article).toMatchObject({
+                    article_id: 14,
+                    title: "Gentleman's Code",
+                    topic: 'cats',
+                    author: 'butter_bridge',
+                    body: 'XYZ',
+                    created_at: expect.any(String),
+                    votes: 0,
+                    article_img_url: 'http://',
+                    comment_count: '0'
+                })
+               
+            })
+    })
+    test("201 - should default for no img_url provided", ()=>{
+        const input = {
+            author: "butter_bridge",
+            title: "Gentleman's Code",
+            body: "XYZ",
+            topic: "cats"
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(input)
+            .expect(201)
+            .then(({body})=>{
+                const { article } = body
+                expect(article).toMatchObject({
+                    article_id: 14,
+                    title: "Gentleman's Code",
+                    topic: 'cats',
+                    author: 'butter_bridge',
+                    body: 'XYZ',
+                    created_at: expect.any(String),
+                    votes: 0,
+                    article_img_url: null,
+                    comment_count: '0'
+                })
+            })
+    })
+    test("201 - should ignore unnecessary properties", ()=>{
+        const input = {
+            author: "butter_bridge",
+            title: "Gentleman's Code",
+            body: "XYZ",
+            topic: "cats",
+            article_img_url: "http://",
+            rogueProperty: "IM ROGUE"
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(input)
+            .expect(201)
+            .then(({body})=>{
+                const { article } = body
+                expect(article).toMatchObject({
+                    article_id: 14,
+                    title: "Gentleman's Code",
+                    topic: 'cats',
+                    author: 'butter_bridge',
+                    body: 'XYZ',
+                    created_at: expect.any(String),
+                    votes: 0,
+                    article_img_url: 'http://',
+                    comment_count: '0'
+                })
+            })
+
+        
+    })
+    test("400 - should return error for body missing required fields", ()=>{
+        const input = {
+            author: "butter_bridge",
+            title: "Gentleman's Code",
+            body: "XYZ",
+            article_img_url: "http://"
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(input)
+            .expect(400)
+            .then(({body})=>{
+                expect(body.msg).toBe('Bad request')
+            })
+    })
+    test("404 - should return error for no existing author", ()=>{
+        const input = {
+            author: "monsieur_bouffant",
+            title: "Gentleman's Code",
+            body: "XYZ",
+            topic: "cats",
+            article_img_url: "http://"
+        }
+        return request(app)
+            .post('/api/articles')
+            .send(input)
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe('Not found')
+            })
+
+    })
+})
+
+
 
 describe("GET /api/articles/:article_id/comments", ()=>{
     test("should return array of comments for given article_id", ()=>{

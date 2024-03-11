@@ -17,7 +17,7 @@ exports.selectAllArticles = async (query)=>{
     //{ sort_by: 'author', order: 'desc', colName: 'cats' }
     
     //DEFINING QUERY PARAMETERS
-    let {sort_by, order} = query
+    let {sort_by, order, limit, p} = query
     const queryArr = []
     const keys = Object.keys(query)
 
@@ -25,7 +25,10 @@ exports.selectAllArticles = async (query)=>{
 
     let sort_byCount = 0
     let orderCount = 0
+    let limitCount = 0
+    let pCount = 0
     let columnName = ''
+    const showFrom = 1
 
     if(sort_by){
         sort_byCount = 1
@@ -47,7 +50,20 @@ exports.selectAllArticles = async (query)=>{
         order = 'DESC'
     }
 
-    if(keys.length - sort_byCount - orderCount > 0){
+    if(limit){
+        limitCount = 1
+    } else {
+        limit = '10'
+    }
+
+    if(p){
+        pCount = 1
+        //calc p - how will you ensure the responses are organised in pages with number of elements equal to limit specified 
+    } else {
+
+    }
+
+    if(keys.length - sort_byCount - orderCount - limitCount - pCount > 0){
         //has colName attempt
         [columnName] = keys.filter((element)=>((element !== 'sort_by') && (element !== 'order')))
         //but it's invalid
@@ -65,14 +81,14 @@ exports.selectAllArticles = async (query)=>{
     //VALIDATION -> ERRORS 
 
     if(filterValue){
-        await checkExists('topics', 'slug', filterValue) 
-        //ANS - NO? does this need .catch() to pass the err to middleware?
+        await checkExists('topics', 'slug', filterValue)
+
         queryStr += ` WHERE articles.topic = $1`
         //modify this to allow for filtering by any column 
         queryArr.push(filterValue) 
     }
 
-        queryStr += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order};`
+        queryStr += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT ${limit};`
         //this doesn't allow you to order by comment_count as it is not on articles
         return db.query(queryStr, queryArr)
 }
@@ -85,5 +101,14 @@ exports.updateArticle = (articleID, voteIncrement)=>{
         const [updatedArticle] = queryResult.rows
         return updatedArticle
     })
+}
+
+exports.addArticle = (newArticle)=>{
+    const {author, title, body, topic, article_img_url} = newArticle
+    const inputs = [author, title, body, topic, article_img_url]
+    let queryStr = `INSERT INTO articles (author, title, body, topic, article_img_url) VALUES ($1, $2, $3, $4, $5) RETURNING *`
+
+    queryStr += `, (SELECT COUNT(*) FROM comments WHERE article_id = articles.article_id) AS comment_count;`
+    return db.query(queryStr, inputs)
 }
 

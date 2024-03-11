@@ -1,4 +1,4 @@
-const { selectArticleByID, selectAllArticles, updateArticle } = require('../models/articles-model')
+const { selectArticleByID, selectAllArticles, updateArticle, addArticle } = require('../models/articles-model')
 
 exports.getArticles = (req, res, next)=>{
     const {query} = req
@@ -35,4 +35,16 @@ exports.patchArticle = (req, res, next)=>{
     .catch((err)=>{
         next(err)
     })
+}
+
+exports.postArticle = (req, res, next)=>{
+    const newArticle = req.body
+    addArticle(newArticle)
+        .then(({rows})=>{
+            const [article] = rows
+            res.status(201).send({article})
+        })
+        .catch((err)=>{
+            next(err)
+        })
 }
