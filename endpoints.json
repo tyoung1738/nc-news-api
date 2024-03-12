@@ -107,7 +107,7 @@
     "description": "updates comment vote count for given comment_id",
     "queries": [],
     "exampleRequestBody": {
-      "increment_count": 100
+      "inc_votes": 100
       },
     "exampleResponse": {
       "comment": {
