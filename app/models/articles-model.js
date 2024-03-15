@@ -88,8 +88,9 @@ exports.selectAllArticles = async (query)=>{
         queryArr.push(filterValue) 
     }
 
-        queryStr += ` GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order} LIMIT ${limit};`
+        queryStr += ` GROUP BY articles.article_id ORDER BY ${sort_by==='comment_count' ? 'comment_count' : 'articles.'+sort_by} ${order} LIMIT ${limit};`
         //this doesn't allow you to order by comment_count as it is not on articles
+        //if(sort_by==='comment_count')
         return db.query(queryStr, queryArr)
 }
 
