@@ -1,7 +1,7 @@
 # Northcoders News API
 
 ## Summary ##
-This repo enables the hosting of a live backend API. It provides the data and seed files to establish test/development/production databases, and provides an express app with error handling, models and controllers to enable querying of the database. It also provides a full test suite. The test database is queried locally via Jest and the production database can be queried via **[this link](https://ty-news-api.onrender.com/api/)**.  
+This repo enables the hosting of a live backend API. It provides the data and seed files to establish test/development/production databases, and provides an app built in `Express.js` with error handling, models and controllers to enable CRUD interactions with a `PostgreSQL` database. It also provides a full Jest test suite. The test database is queried locally via Jest and the production database can be queried via **[this link](https://ty-news-api.onrender.com/api/)**.  
 
 ## Instructions ##
 
@@ -11,13 +11,13 @@ This repo enables the hosting of a live backend API. It provides the data and se
 
 3. In order to run the protocol locally, we must set up our test and development databases.
     
-    Create 2 files:  
+    Create 2 files in the parent directory:  
         a) `.env.test`  
         b) `.env.development`  
     
-    In each file, define the database to be used for each environment:  
-        a) `PGDATABASE=nc_news`  
-        b) `PGDATABASE=nc_news_test`  
+    In each file, define the database to be used for each environment:
+        a) `PGDATABASE=nc_news_test`
+        b) `PGDATABASE=nc_news`  
 
 We have configured our `connection.js` file to connect to our test database when running tests and connect to our development database otherwise. 
 
